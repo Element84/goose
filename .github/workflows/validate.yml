@@ -12,7 +12,10 @@ permissions:
   contents: read
 
 jobs:
-  update-lambdas:
+  validate:
+    permissions:
+      id-token: write
+      contents: read
     runs-on: ubuntu-latest
     env:
       CI: true
