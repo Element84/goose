@@ -63,6 +63,20 @@ jobs:
         id: update_cirrus_lambda_dist
         run: ./scripts/update-cirrus-lambda-dist.bash
 
+      - uses: terraform-linters/setup-tflint@v4
+        with:
+          tflint_version: "v0.49.0"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install pre-commit
+        run: pip install pre-commit
+
+      - name: Run pre-commit
+        run: pre-commit run --all-files
+
       - name: Configure Terraform Init Credentials
         id: init_creds
         uses: aws-actions/configure-aws-credentials@v4
@@ -78,20 +92,3 @@ jobs:
       - name: Terraform Validate
         id: tf_validate
         run: terraform validate -no-color
-  pre-commit:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: "1.7.5"
-      - uses: terraform-linters/setup-tflint@v4
-        with:
-          tflint_version: "v0.49.0"
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-      - name: Install pre-commit
-        run: pip install pre-commit
-      - name: Run pre-commit
-        run: pre-commit run --all-files
