@@ -10,10 +10,114 @@ on:
 
 jobs:
   deploy-dev:
-    uses: ./.github/workflows/deploy-wf.yaml
-    secrets: inherit
-    concurrency: dev
-    with:
-      stage: dev
-      url: https://console.goose.filmdrop.element84.com
+    permissions:
+      id-token: write
+      contents: read
+    runs-on: ubuntu-latest
+    env:
+      CI: true
+      STAC_SERVER_TAG: v3.7.0
+      CIRRUS_TAG: v1.0.0a0
       fd-aws-tf-modules-version: v2.29.0
+      stage: dev
+      project-name: goose
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.7.5"
+
+      - name: Preparing Environment
+        id: prep_env
+        run: |
+          echo "Creating terraform backend file ..."
+          echo '' > config.s3.backend.tf
+          echo 'terraform {' >> config.s3.backend.tf
+          echo '  backend "s3" {' >> config.s3.backend.tf
+          echo '    encrypt = true' >> config.s3.backend.tf
+          echo "    bucket = \"${{ secrets.TF_STATE_BUCKET }}\"" >> config.s3.backend.tf
+          echo "    dynamodb_table = \"${{ secrets.TF_STATE_LOCK_TABLE }}\"" >> config.s3.backend.tf
+          echo "    key = \"${{ env.project-name }}-${{ env.stage }}.tfstate\"" >> config.s3.backend.tf
+          echo "    region = \"${{ secrets.AWS_REGION }}\"" >> config.s3.backend.tf
+          echo '  }' >> config.s3.backend.tf
+          echo '}' >> config.s3.backend.tf
+          cat config.s3.backend.tf
+          echo "Using FilmDrop Terraform ${{ env.fd-aws-tf-modules-version }} release..."
+          ./scripts/retrieve_tf_modules.sh ${{ env.fd-aws-tf-modules-version }}
+
+      - name: Update stac-server lambdas
+        id: update_stac_lambdas
+        run: ./scripts/update-stac-server-lambdas.bash
+
+      - name: Update cirrus lambda dist
+        id: update_cirrus_lambda_dist
+        run: ./scripts/update-cirrus-lambda-dist.bash
+
+      - name: Configure Terraform Init Credentials
+        id: init_creds
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ secrets.AWS_REGION }}
+          role-to-assume: ${{ secrets.AWS_ROLE }}
+          role-session-name: GooseTFInit
+
+      - name: Terraform Init
+        id: tf_init
+        run: terraform init
+
+      - name: Terraform Validate
+        id: tf_validate
+        run: terraform validate
+
+      - name: Configure Terraform Plan Credentials
+        id: plan_creds
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ secrets.AWS_REGION }}
+          role-to-assume: ${{ secrets.AWS_ROLE }}
+          role-session-name: GooseTFPlan
+
+      - name: Terraform Plan
+        id: tf_plan
+        run: terraform plan -var-file="${{ inputs.stage }}.tfvars" -out ${{ inputs.stage }}.tfplan -lock=false
+
+      - name: Configure Terraform Apply Credentials
+        id: apply_creds
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ secrets.AWS_REGION }}
+          role-to-assume: ${{ secrets.AWS_ROLE }}
+          role-session-name: GooseTFApply
+
+      - name: Terraform Apply
+        id: tf_apply
+        run: terraform apply -lock=false -input=false ${{ inputs.stage }}.tfplan
+
+      - name: Post status to Slack channel
+        id: tf_apply_successs
+        if: steps.tf_apply.outcome == 'success'
+        continue-on-error: true
+        uses: slackapi/slack-github-action@v1.26.0
+        with:
+          channel-id: ${{ secrets.SLACK_CHANNEL_ID }}
+          slack-message: ":silly-goose: ${{ env.project-name }}-${{ inputs.stage }}-titiler ${{  github.ref_name }} terraform apply job has succeeded!\n${{ github.event.pull_request.html_url || github.event.head_commit.url }}"
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+
+      - name: Post status to Slack channel
+        id: tf_apply_failure
+        if: steps.tf_apply.outcome != 'success'
+        continue-on-error: true
+        uses: slackapi/slack-github-action@v1.26.0
+        with:
+          channel-id: ${{ secrets.SLACK_CHANNEL_ID }}
+          slack-message: ":goosebonk: ${{ env.project-name }}-${{ inputs.stage }}-titiler ${{  github.ref_name }} terraform apply has failed!\n:alert: make sure cleanup job deletes all AWS resources!\n${{ github.event.pull_request.html_url || github.event.head_commit.url }}"
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
