@@ -1,0 +1,19 @@
+name: 🚀 Deploy Dev
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - v.*
+  workflow_dispatch:
+
+jobs:
+  deploy-dev:
+    uses: ./.github/workflows/deploy-wf.yaml
+    secrets: inherit
+    concurrency: dev
+    with:
+      stage: dev
+      url: https://console.goose.filmdrop.element84.com
+      fd-aws-tf-modules-version: v2.29.0

@@ -1,0 +1,94 @@
+name: Pre-commit CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    permissions:
+      id-token: write
+      contents: read
+    runs-on: ubuntu-latest
+    env:
+      CI: true
+      STAC_SERVER_TAG: v3.7.0
+      CIRRUS_TAG: v1.0.0a0
+      fd-aws-tf-modules-version: v2.29.0
+      stage: dev
+      project-name: goose
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.7.5"
+
+      - name: Preparing Environment
+        id: prep_env
+        run: |
+          echo "Creating terraform backend file ..."
+          echo '' > config.s3.backend.tf
+          echo 'terraform {' >> config.s3.backend.tf
+          echo '  backend "s3" {' >> config.s3.backend.tf
+          echo '    encrypt = true' >> config.s3.backend.tf
+          echo "    bucket = \"${{ secrets.TF_STATE_BUCKET }}\"" >> config.s3.backend.tf
+          echo "    dynamodb_table = \"${{ secrets.TF_STATE_LOCK_TABLE }}\"" >> config.s3.backend.tf
+          echo "    key = \"${{ env.project-name }}-${{ env.stage }}.tfstate\"" >> config.s3.backend.tf
+          echo "    region = \"${{ secrets.AWS_REGION }}\"" >> config.s3.backend.tf
+          echo '  }' >> config.s3.backend.tf
+          echo '}' >> config.s3.backend.tf
+          cat config.s3.backend.tf
+          echo "Using FilmDrop Terraform ${{ env.fd-aws-tf-modules-version }} release..."
+          ./scripts/retrieve_tf_modules.sh ${{ env.fd-aws-tf-modules-version }}
+
+      - name: Update stac-server lambdas
+        id: update_stac_lambdas
+        run: ./scripts/update-stac-server-lambdas.bash
+
+      - name: Update cirrus lambda dist
+        id: update_cirrus_lambda_dist
+        run: ./scripts/update-cirrus-lambda-dist.bash
+
+      - uses: terraform-linters/setup-tflint@v4
+        with:
+          tflint_version: "v0.49.0"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install pre-commit
+        run: pip install pre-commit
+
+      - name: Run pre-commit
+        run: pre-commit run --all-files
+
+      - name: Configure Terraform Init Credentials
+        id: init_creds
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ secrets.AWS_REGION }}
+          role-to-assume: ${{ secrets.AWS_ROLE }}
+          role-session-name: GitHubReleaseInit
+
+      - name: Terraform Init
+        id: tf_init
+        run: terraform init
+
+      - name: Terraform Validate
+        id: tf_validate
+        run: terraform validate -no-color
