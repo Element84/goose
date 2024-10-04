@@ -2,7 +2,7 @@
 # The following variables are global to the FilmDrop infrastructure stack
 environment            = "dev"
 project_name           = "goose"
-domain_zone            = "Z0917278253RCNL9GYNYQ"
+domain_zone            = "Z0819677ZFL9ITB1994A"
 s3_access_log_bucket   = ""
 s3_logs_archive_bucket = ""
 
