@@ -93,6 +93,7 @@ Resources:
               - "route53:*"
               - "events:*"
               - "ecs:*"
+              - "es:*"
               - "iam:CreateUser"
               - "iam:CreatePolicy"
               - "iam:CreateGroup"
@@ -129,6 +130,7 @@ Resources:
               - "cloudwatch:*"
               - "sts:Decode*"
               - "states:*"
+              - "timestream:*"
             Resource: "*"
       Roles:
         - !Ref DeployRole
