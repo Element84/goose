@@ -98,6 +98,7 @@ jobs:
 
       - name: Terraform Apply
         id: tf_apply
+        continue-on-error: true
         run: terraform apply -lock=false -input=false ${{ env.stage }}.tfplan
 
       - name: Post status to Slack channel
@@ -107,7 +108,7 @@ jobs:
         uses: slackapi/slack-github-action@v1.26.0
         with:
           channel-id: ${{ secrets.SLACK_CHANNEL_ID }}
-          slack-message: ":silly-goose: ${{ env.project-name }}-${{ env.stage }}-titiler ${{  github.ref_name }} terraform apply job has succeeded!\n${{ github.event.pull_request.html_url || github.event.head_commit.url }}"
+          slack-message: ":silly-goose: ${{ env.project-name }} ${{  github.ref_name }} terraform apply job has succeeded!\n${{ github.event.pull_request.html_url || github.event.head_commit.url }}"
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
@@ -118,6 +119,6 @@ jobs:
         uses: slackapi/slack-github-action@v1.26.0
         with:
           channel-id: ${{ secrets.SLACK_CHANNEL_ID }}
-          slack-message: ":goosebonk: ${{ env.project-name }}-${{ env.stage }}-titiler ${{  github.ref_name }} terraform apply has failed!\n:alert: make sure cleanup job deletes all AWS resources!\n${{ github.event.pull_request.html_url || github.event.head_commit.url }}"
+          slack-message: ":goosebonk: ${{ env.project-name }} ${{  github.ref_name }} terraform apply has failed! :alert:\n${{ github.event.pull_request.html_url || github.event.head_commit.url }}"
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
