@@ -63,6 +63,14 @@ jobs:
         id: update_cirrus_lambda_dist
         run: ./scripts/update-cirrus-lambda-dist.bash
 
+      - name: Configure Terraform Init Credentials
+        id: init_creds
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ secrets.AWS_REGION }}
+          role-to-assume: ${{ secrets.AWS_ROLE }}
+          role-session-name: GitHubReleaseInit
+
       - name: Terraform Init
         id: tf_init
         run: terraform init
