@@ -1,3 +1,3 @@
-# goose
+# Goose
 
-Cirrus Terraform Example Project
+Cirrus Example Deployment Project via FilmDrop Terraform Infrastructure, codename: Goose
