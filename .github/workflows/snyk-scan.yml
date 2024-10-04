@@ -1,6 +1,4 @@
-# This workflow sets up Snyk scans
-
-name: Snyk Scan
+name: 🛡️ Snyk Scan
 
 on:
   push:
