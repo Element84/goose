@@ -11,6 +11,7 @@ cp filmdrop-aws-tf-modules-${FILMDROP_TERRAFORM_RELEASE:1}/filmdrop.tf .
 cp filmdrop-aws-tf-modules-${FILMDROP_TERRAFORM_RELEASE:1}/providers.tf .
 cp filmdrop-aws-tf-modules-${FILMDROP_TERRAFORM_RELEASE:1}/inputs.tf .
 cp filmdrop-aws-tf-modules-${FILMDROP_TERRAFORM_RELEASE:1}/outputs.tf .
+cp filmdrop-aws-tf-modules-${FILMDROP_TERRAFORM_RELEASE:1}/providers.tf .
 cp -r filmdrop-aws-tf-modules-${FILMDROP_TERRAFORM_RELEASE:1}/modules .
 cp -r filmdrop-aws-tf-modules-${FILMDROP_TERRAFORM_RELEASE:1}/profiles .
 cp -r filmdrop-aws-tf-modules-${FILMDROP_TERRAFORM_RELEASE:1}/scripts/* ./scripts/
