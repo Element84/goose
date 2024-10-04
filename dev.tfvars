@@ -87,8 +87,6 @@ titiler_inputs = {
   }
 }
 
-analytics_inputs = {}
-
 console_ui_inputs = {
   app_name                = "console"
   domain_alias            = "console.goose.filmdrop.element84.com"
@@ -161,8 +159,8 @@ cirrus_inputs = {
 }
 
 cirrus_dashboard_inputs = {
-  app_name             = "dashboard.goose.filmdrop.element84.com"
-  domain_alias         = ""
+  app_name             = "dashboard"
+  domain_alias         = "dashboard.goose.filmdrop.element84.com"
   deploy_cloudfront    = true
   web_acl_id           = ""
   version              = "v0.5.1"
