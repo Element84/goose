@@ -11,7 +11,7 @@
   </a>
 </p>
 
-# Cirrus Terraform Example Deployment Project, codename: Goose
+# 🪿 Cirrus Terraform Example Deployment Project
 
 This project deploys [Cirrus](https://github.com/cirrus-geo/cirrus-geo) via the FilmDrop Terraform Infrastructure developed and maintained by [Element 84, Inc](https://element84.com/).
 
