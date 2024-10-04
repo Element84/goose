@@ -83,7 +83,7 @@ jobs:
         with:
           aws-region: ${{ secrets.AWS_REGION }}
           role-to-assume: ${{ secrets.AWS_ROLE }}
-          role-session-name: GitHubReleaseInit
+          role-session-name: GooseValidate
 
       - name: Terraform Init
         id: tf_init
