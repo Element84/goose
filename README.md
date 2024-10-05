@@ -1,10 +1,10 @@
 <!-- markdownlint-disable MD033 MD041 -->
 <p align="center">
   <a href="https://github.com/Element84/goose/actions?query=workflow%3ADeploy%20Dev" target="_blank">
-      <img src="https://github.com/Element84/goose/workflows/Deploy%20Dev/badge.svg" alt="Deploy Status">
+      <img src="https://github.com/Element84/goose/actions/workflows/deploy-dev.yml/badge.svg" alt="Deploy Status">
   </a>
   <a href="https://github.com/Element84/goose/actions?query=workflow%3ASnyk%20Scan" target="_blank">
-      <img src="https://github.com/Element84/goose/workflows/Snyk%20Scan/badge.svg" alt="Scan Status">
+      <img src="https://github.com/Element84/goose/actions/workflows/snyk-scan.yml/badge.svg" alt="Scan Status">
   </a>
   <a href="https://github.com/Element84/goose/blob/main/LICENSE" target="_blank">
       <img src="https://img.shields.io/github/license/Element84/goose?color=2334D058" alt="License">
