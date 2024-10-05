@@ -98,13 +98,11 @@ jobs:
 
       - name: Terraform Apply
         id: tf_apply
-        continue-on-error: true
         run: terraform apply -lock=false -input=false ${{ env.stage }}.tfplan
 
       - name: Post status to Slack channel
         id: tf_apply_successs
-        if: steps.tf_apply.outcome == 'success'
-        continue-on-error: true
+        if: always() && steps.tf_apply.outcome == 'success'
         uses: slackapi/slack-github-action@v1.26.0
         with:
           channel-id: ${{ secrets.SLACK_CHANNEL_ID }}
@@ -114,8 +112,7 @@ jobs:
 
       - name: Post status to Slack channel
         id: tf_apply_failure
-        if: steps.tf_apply.outcome != 'success'
-        continue-on-error: true
+        if: always() && steps.tf_apply.outcome != 'success'
         uses: slackapi/slack-github-action@v1.26.0
         with:
           channel-id: ${{ secrets.SLACK_CHANNEL_ID }}

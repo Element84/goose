@@ -1,4 +1,4 @@
-name: 📝 Validation
+name: 📝 Validate & Plan
 
 on:
   push:
@@ -12,7 +12,7 @@ permissions:
   contents: read
 
 jobs:
-  validate:
+  validate-and-plan:
     permissions:
       id-token: write
       contents: read
@@ -92,3 +92,15 @@ jobs:
       - name: Terraform Validate
         id: tf_validate
         run: terraform validate -no-color
+
+      - name: Configure Terraform Plan Credentials
+        id: plan_creds
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ secrets.AWS_REGION }}
+          role-to-assume: ${{ secrets.AWS_ROLE }}
+          role-session-name: GooseTFPlan
+
+      - name: Terraform Plan
+        id: tf_plan
+        run: terraform plan -var-file="${{ env.stage }}.tfvars" -out ${{ env.stage }}.tfplan -lock=false
