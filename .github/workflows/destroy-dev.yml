@@ -1,9 +1,6 @@
 name: ❌ Destroy Dev
 
 on:
-  pull_request:
-    branches:
-      - main
   workflow_dispatch:
 
 jobs:
@@ -65,6 +62,6 @@ jobs:
           role-to-assume: ${{ secrets.AWS_ROLE }}
           role-session-name: GooseTFPlan
 
-      - name: Terraform Plan
-        id: tf_plan
-        run: terraform plan -var-file="${{ env.stage }}.tfvars" -destroy
+      - name: Terraform Destroy
+        id: tf_destroy
+        run: terraform destroy -var-file="${{ env.stage }}.tfvars" -auto-approve
