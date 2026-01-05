@@ -45,11 +45,19 @@ jobs:
           echo "Using FilmDrop Terraform ${{ env.fd-aws-tf-modules-version }} release..."
           ./scripts/retrieve_tf_modules.sh ${{ env.fd-aws-tf-modules-version }}
 
+      - name: Configure Init Credentials
+        id: init_creds
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ secrets.AWS_REGION }}
+          role-to-assume: ${{ secrets.AWS_ROLE }}
+          role-session-name: GooseTFInit
+
       - name: Terraform Init
         id: tf_init
         run: terraform init
 
-      - name: Configure Credentials
+      - name: Configure Plan Credentials
         id: plan_creds
         uses: aws-actions/configure-aws-credentials@v4
         with:
