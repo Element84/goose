@@ -1,6 +1,9 @@
-name: Destroy Dev
+name: ❌ Destroy Dev
 
 on:
+  pull_request:
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
@@ -16,7 +19,6 @@ jobs:
       fd-aws-tf-modules-version: v2.29.0
       stage: dev
       project-name: goose
-
 
     steps:
       - uses: actions/checkout@v4
