@@ -54,13 +54,13 @@ jobs:
         id: tf_init
         run: terraform init
 
-      - name: Configure Plan Credentials
-        id: plan_creds
+      - name: Configure Destroy Credentials
+        id: destroy_creds
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ secrets.AWS_REGION }}
           role-to-assume: ${{ secrets.AWS_ROLE }}
-          role-session-name: GooseTFPlan
+          role-session-name: GooseTFApply
 
       - name: Terraform Destroy
         id: tf_destroy
